@@ -14,8 +14,10 @@ func main() {
 	const LEFT_DIRECTION = "L"
 	const RIGHT_DIRECTION = "R"
 
-	zeroDialCount := 0
-	currentDial := INITIAL_DIAL
+	zeroPointCount := 0
+	zeroClickCount := 0
+
+	dial := INITIAL_DIAL
 
 	file, err := os.Open(INPUT_FILE_PATH)
 	if err != nil {
@@ -32,31 +34,42 @@ func main() {
 			fmt.Printf("failed to convert string to integer: %v", err)
 		}
 
+		fullRotationCount := distance / 100
+		if fullRotationCount >= 1 {
+			zeroClickCount += fullRotationCount
+		}
+
 		remainingDistance := distance % TOTAL_DIALS
 
 		var calculatedDial int
 		switch direction {
 		case LEFT_DIRECTION:
-			calculatedDial = currentDial - remainingDistance
+			calculatedDial = dial - remainingDistance
 			if calculatedDial >= 0 {
-				currentDial = calculatedDial
+				dial = calculatedDial
 			} else {
-				currentDial = TOTAL_DIALS + calculatedDial
+				if dial != 0 {
+					zeroClickCount++
+				}
+				dial = TOTAL_DIALS + calculatedDial
 			}
 		case RIGHT_DIRECTION:
-			calculatedDial = currentDial + remainingDistance
+			calculatedDial = dial + remainingDistance
 			if calculatedDial < TOTAL_DIALS {
-				currentDial = calculatedDial
+				dial = calculatedDial
 			} else {
-				currentDial = remainingDistance - (TOTAL_DIALS - currentDial)
+				dial = remainingDistance - (TOTAL_DIALS - dial)
+				if dial != 0 {
+					zeroClickCount++
+				}
 			}
 		}
 
-		if currentDial == 0 {
-			zeroDialCount++
+		if dial == 0 {
+			zeroPointCount++
 		}
 	}
 
-	password := zeroDialCount
+	password := zeroPointCount + zeroClickCount
 	fmt.Println("password:", password)
 }
